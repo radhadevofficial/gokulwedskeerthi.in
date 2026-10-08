@@ -1,0 +1,49 @@
+name: Deploy to CloudPanel VPS
+
+on:
+  push:
+    branches:
+      - deploy
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -eu
+
+            APP_PATH="$HOME/htdocs/gokulwedskeerthi.in"
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
+            nvm use --lts
+
+            if [ ! -d "$APP_PATH/.git" ]; then
+              mkdir -p "$APP_PATH"
+              git clone --branch deploy https://github.com/radhadevofficial/gokulwedskeerthi.in.git "$APP_PATH"
+            else
+              cd "$APP_PATH"
+              git fetch origin deploy
+              git reset --hard origin/deploy
+            fi
+
+            cd "$APP_PATH"
+            test -f .env
+            npm ci
+            npm run build
+
+            if ! command -v pm2 >/dev/null 2>&1; then
+              npm install --global pm2
+            fi
+
+            pm2 startOrRestart ecosystem.config.cjs
+            pm2 save
