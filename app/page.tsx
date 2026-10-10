@@ -18,13 +18,25 @@ const family = [
 
 export default function Page() {
   const [wish, setWish] = useState('')
+  const [senderName, setSenderName] = useState('')
+  const [wishStep, setWishStep] = useState<'wish' | 'name'>('wish')
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
 
   async function sendWish() {
     const message = wish.trim()
-    if (!message || sending) return
+    const name = senderName.trim()
+    if (sending) return
+
+    if (wishStep === 'wish') {
+      if (!message) return
+      setWishStep('name')
+      setError('')
+      return
+    }
+
+    if (!message || !name) return
 
     setSending(true)
     setSent(false)
@@ -34,7 +46,7 @@ export default function Page() {
       const response = await fetch('/api/wishes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wish: message }),
+        body: JSON.stringify({ wish: message, senderName: name }),
       })
       const result = await response.json()
 
@@ -44,6 +56,8 @@ export default function Page() {
 
       setSent(true)
       setWish('')
+      setSenderName('')
+      setWishStep('wish')
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : 'We could not send your wishes.')
     } finally {
@@ -112,7 +126,7 @@ export default function Page() {
 
       <section className="families section-pad"><div className="section-heading"><p className="eyebrow">Together with our families</p><h2>Happily inviting you</h2></div><div className="family-grid">{family.map((item) => <article className="family-card" key={item.role}><div className="family-dot"><Heart size={15} fill="currentColor" /></div><p className="detail-label">{item.role}</p><h3>{item.name}</h3><p>{item.note}</p></article>)}</div></section>
 
-      <section className="wishes section-pad" id="wishes"><div className="wishes-inner"><Heart className="wishes-heart" size={26} fill="currentColor" /><p className="eyebrow light">Leave a little love</p><h2>Send us your wishes</h2><p>Your blessings mean the world to us. Write us a note to make our celebration even more special.</p><div className="wish-form"><label className="sr-only" htmlFor="wish">Your wishes</label><textarea id="wish" value={wish} maxLength={1000} onChange={(event) => { setWish(event.target.value); setSent(false); setError('') }} placeholder="Write your wishes here..." rows={3} disabled={sending} /><button type="button" onClick={sendWish} aria-label="Send your wishes" disabled={sending || !wish.trim()} aria-busy={sending}><Send size={17} /></button></div>{sending && <p className="wish-status">Sending your wishes with love...</p>}{sent && <p className="success-message">Your lovely wishes have been sent with love. Thank you!</p>}{error && <p className="error-message" role="alert">{error}</p>}</div></section>
+      <section className="wishes section-pad" id="wishes"><div className="wishes-inner"><Heart className="wishes-heart" size={26} fill="currentColor" /><p className="eyebrow light">Leave a little love</p><h2>{wishStep === 'wish' ? 'Send us your wishes' : 'One little detail'}</h2><p>{wishStep === 'wish' ? 'Your blessings mean the world to us. Write us a note to make our celebration even more special.' : 'Tell us who is sending this beautiful wish.'}</p>{wishStep === 'wish' ? <div className="wish-form"><label className="sr-only" htmlFor="wish">Your wishes</label><textarea id="wish" value={wish} maxLength={1000} onChange={(event) => { setWish(event.target.value); setSent(false); setError('') }} placeholder="Write your wishes here..." rows={3} disabled={sending} /><button type="button" onClick={sendWish} aria-label="Continue to sender name" disabled={sending || !wish.trim()} aria-busy={sending}><Send size={17} /></button></div> : <div className="wish-confirm"><div className="wish-preview">“{wish}”</div><label htmlFor="sender-name">Your name</label><input id="sender-name" value={senderName} maxLength={100} onChange={(event) => { setSenderName(event.target.value); setError('') }} placeholder="Enter your name" autoComplete="name" disabled={sending} /><div className="wish-actions"><button type="button" className="wish-back" onClick={() => setWishStep('wish')} disabled={sending}>Back</button><button type="button" className="wish-send" onClick={sendWish} disabled={sending || !senderName.trim()} aria-busy={sending}>{sending ? 'Sending...' : 'Deliver my wish'} <Send size={16} /></button></div></div>}{sending && <p className="wish-status">Sending your wishes with love...</p>}{sent && <p className="success-message" role="alert">Delivered with love. Thank you for your wonderful wishes!</p>}{error && <p className="error-message" role="alert">{error}</p>}</div></section>
 
       <footer><p className="monogram">G <span>&</span> K</p><p>With love, Gokulakannan & Keerthika</p><p className="footer-small">25 · 10 · 2026</p><p className="footer-credit">Crafted with care by <a href="https://radhadev.com" target="_blank" rel="noreferrer">Radhadev Solutions</a></p></footer>
     </main>
