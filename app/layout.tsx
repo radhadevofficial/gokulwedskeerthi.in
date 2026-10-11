@@ -3,25 +3,25 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://gokulwedskeerthi.in'),
   title: 'Gokulakannan & Keerthika | Wedding Invitation',
   description: 'A warm invitation to celebrate the wedding of Gokulakannan and Keerthika on Sunday, 25 October 2026.',
-  generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/favicon.ico',
+  },
+  openGraph: {
+    title: 'Gokulakannan & Keerthika | Wedding Invitation',
+    description: 'Join Gokulakannan and Keerthika as they begin their forever together.',
+    url: 'https://gokulwedskeerthi.in',
+    siteName: 'Gokulakannan & Keerthika',
+    type: 'website',
+    images: [{ url: '/images/hero-port-v2.jpg', alt: 'Gokulakannan and Keerthika wedding invitation' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Gokulakannan & Keerthika | Wedding Invitation',
+    description: 'Join Gokulakannan and Keerthika as they begin their forever together.',
+    images: ['/images/hero-port-v2.jpg'],
   },
 }
 
